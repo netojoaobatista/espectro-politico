@@ -3,11 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Espectro-politico by netojoaobatista</title>
+    <title>Espectro político de 5 dimensões</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="javascripts/scale.fix.js"></script>
+    <script src="javascripts/quiz.js"></script>
+    <script src="javascripts/jquery.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
     <!--[if lt IE 9]>
@@ -17,20 +19,13 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Espectro-politico</h1>
-        <p>Espectro político de 5 dimensões</p>
-        <p class="view"><a href="https://github.com/netojoaobatista/espectro-politico">View the Project on GitHub <small>netojoaobatista/espectro-politico</small></a></p>
-        <ul>
-          <li><a href="https://github.com/netojoaobatista/espectro-politico/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/netojoaobatista/espectro-politico/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/netojoaobatista/espectro-politico">View On <strong>GitHub</strong></a></li>
-        </ul>
+        <h1>Espectro político de 5 dimensões</h1>
+        <p>Baseado no quiz <a href="http://www.abtirsi.com/quiz2.php">5 Dimensional Policial Compass</a></p>
       </header>
-      <section>
-        <h3>
-<a id="espectro-político-de-5-dimensões" class="anchor" href="#espectro-pol%C3%ADtico-de-5-dimens%C3%B5es" aria-hidden="true"><span class="octicon octicon-link"></span></a>Espectro político de 5 dimensões</h3>
-
-<p>Baseado no quiz <a href="http://www.abtirsi.com/quiz2.php">5 Dimensional Policial Compass</a></p>
+      <section id="quiz-container">
+          <table id="quiz-table">
+          </table>
+          <a id="quiz-result" href="#" class="button">Resultado</a>
       </section>
     </div>
     <footer>
@@ -38,6 +33,81 @@
       <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
     </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+    <script type="text/javascript">
+        $(function() {
+            function resetAnswers(quiz) {
+                var answers = [];
+
+                for (var i = 0, t = quiz.questions.length; i < t; ++i) {
+                    answers[i] = 'm';
+                }
+
+                return answers;
+            }
+
+            function createTable(quiz,answers) {
+                var fragment = document.createDocumentFragment();
+
+                for (var i = 0, t = quiz.questions.length; i < t; ++i) {
+                    var tr = document.createElement('tr');
+
+                    tr.setAttribute('data-question-offset', i);
+                    tr.setAttribute('id', 'q' + (i + 1));
+
+                    tr.innerHTML = '<td>' + (i + 1) + '</td>' +
+                                   '<td>' + quiz.questions[i].q + '</td>' +
+                                   '<td><a href="#q' + (i + 1) + '" class="vote yes" data-answer="y">Sim</a></td>' +
+                                   '<td><a href="#q' + (i + 1) + '" class="vote no" data-answer="n">Não</a></td>';
+
+                    fragment.appendChild(tr);
+                }
+
+                document.getElementById('quiz-table').appendChild(fragment);
+
+                $('#quiz-table a.vote').on('click', function(e) {
+                    var tr = $(this).parent().parent();
+                    var answer = $(this).attr('data-answer');
+
+                    e.preventDefault();
+
+                    tr.addClass('answered');
+                    tr.addClass(answer === 'y' ? 'yes':'no');
+
+                    answers[tr.attr('data-question-offset')] = answer;
+                });
+
+                $('#quiz-result').on('click', function(e) {
+                    showResult(quiz, answers);
+                });
+            }
+            
+            function showResult(quiz, answers) {
+                var fragment = document.createDocumentFragment();
+                var result = quiz.checkAnswers(answers);
+                var h2 = document.createElement('h2');
+                var ul = document.createElement('ul');
+                
+                h2.appendChild(document.createTextNode(result.summary));
+
+                ul.innerHTML = '<li>Coletivismo: ' + Math.round(result.collectivism) + '%</li>' +
+                               '<li>Autoritarismo: ' + Math.round(result.authoritarianism) + '%</li>' +
+                               '<li>Internacionalismo: ' + Math.round(result.internationalism) + '%</li>' +
+                               '<li>Tribalismo: ' + Math.round(result.tribalism) + '%</li>' +
+                               '<li>Liberalismo: ' + Math.round(result.liberalism) + '%</li>';
+
+                fragment.appendChild(h2);
+                fragment.appendChild(ul);
+
+                $('#quiz-table').remove();
+                $('#quiz-result').remove();
+
+                document.getElementById('quiz-container').appendChild(fragment);
+            }
+
+            var answers = resetAnswers(quiz);
+
+            createTable(quiz,answers);
+        });
+    </script>
   </body>
 </html>
