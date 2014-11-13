@@ -23,9 +23,6 @@
         <p>Baseado no quiz <a href="http://www.abtirsi.com/quiz2.php">5 Dimensional Policial Compass</a></p>
       </header>
       <section id="quiz-container">
-          <table id="quiz-table">
-          </table>
-          <a id="quiz-result" href="#" class="button">Resultado</a>
       </section>
     </div>
     <footer>
@@ -47,6 +44,10 @@
 
             function createTable(quiz,answers) {
                 var fragment = document.createDocumentFragment();
+                var table = document.createElement('table');
+                var result = document.createElement('a');
+
+                table.setAttribute('id', 'quiz-table');
 
                 for (var i = 0, t = quiz.questions.length; i < t; ++i) {
                     var tr = document.createElement('tr');
@@ -60,10 +61,18 @@
                                    '<td><a href="#q' + (i + 1) + '" class="vote no" data-answer="n">Não</a></td>' +
                                    '<td><a href="#q' + (i + 1) + '" class="vote maybe" data-answer="m">Talvez</a></td>';
 
-                    fragment.appendChild(tr);
+                    table.appendChild(tr);
                 }
 
-                document.getElementById('quiz-table').appendChild(fragment);
+                result.setAttribute('id', 'quiz-result');
+                result.setAttribute('href', '#');
+                result.setAttribute('class', 'button');
+                result.appendChild(document.createTextNode('Resultado'));
+
+                fragment.appendChild(table);
+                fragment.appendChild(result);
+
+                document.getElementById('quiz-container').appendChild(fragment);
 
                 $('#quiz-table a.vote').on('click', function(e) {
                     var tr = $(this).parent().parent();
@@ -99,15 +108,29 @@
                     showResult(quiz, answers);
                 });
             }
+
+            function startQuiz(quiz) {
+                var answers = resetAnswers(quiz);
+
+                createTable(quiz,answers);
+            }
             
             function showResult(quiz, answers) {
                 var fragment = document.createDocumentFragment();
                 var result = quiz.checkAnswers(answers);
                 var h2 = document.createElement('h2');
                 var ul = document.createElement('ul');
+                var back = document.createElement('a');
+
+                back.setAttribute('class', 'button back');
+                back.setAttribute('href', '#');
+                back.setAttribute('id', 'quiz-restart');
+                back.appendChild(document.createTextNode('Reiniciar'));
                 
                 h2.appendChild(document.createTextNode(result.summary));
+                h2.setAttribute('id', 'quiz-summary');
 
+                ul.setAttribute('id', 'quiz-topics');
                 ul.innerHTML = '<li>Coletivismo: ' + Math.round(result.collectivism) + '%</li>' +
                                '<li>Autoritarismo: ' + Math.round(result.authoritarianism) + '%</li>' +
                                '<li>Internacionalismo: ' + Math.round(result.internationalism) + '%</li>' +
@@ -116,16 +139,23 @@
 
                 fragment.appendChild(h2);
                 fragment.appendChild(ul);
+                fragment.appendChild(back);
 
                 $('#quiz-table').remove();
                 $('#quiz-result').remove();
 
                 document.getElementById('quiz-container').appendChild(fragment);
+
+                $('#quiz-restart').on('click', function(e) {
+                    $('#quiz-summary').remove();
+                    $('#quiz-topics').remove();
+                    $('#quiz-restart').remove();
+
+                    startQuiz(quiz);
+                });
             }
 
-            var answers = resetAnswers(quiz);
-
-            createTable(quiz,answers);
+            startQuiz(quiz);
         });
     </script>
   </body>
