@@ -52,12 +52,14 @@ var quiz = {
         return this.liberalism[this.getOffset(total)];
     },
     getOffset: function(total) {
-        var base = 100/6;
-        var ranges = [[-6,-5],[-4,-3],[-2,-1],[0,0],[1,2],[3,4],[5,6]];
+        var ranges = [[-100,-83],[-82.99,-33],[-32.99,-17],[-16.99,16.99],[17,32.99],[33,82.99],[83,100]];
+
+        if (total < ranges[0][0]) return 0;
+        if (total > ranges[6][1]) return 6;
 
         for (var i = 0, t = ranges.length;i < t; ++i) {
-            if (total >= ranges[i][0] * base &&
-                total <= ranges[i][1] * base) {
+            if (total >= ranges[i][0] &&
+                total <= ranges[i][1]) {
                 return i;
             }
         }
